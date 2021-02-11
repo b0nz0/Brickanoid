@@ -63,6 +63,8 @@ class BrickanoidLogic():
     _level_clear = True
     #paused
     _pause = False
+    #true if animation for new level must start
+    _starting_new_level = True
 
     # game properties from gfx
     _unitary_width = 0
@@ -76,8 +78,12 @@ class BrickanoidLogic():
     _lives_lbl = None
     _score_lbl = None
 
+    # level mgmt
+    _level_loader = None
+
     def __init__(self, game_screen):
         self._game_screen = game_screen
+        self._level_loader = brickanoid_levels.load_levels(self)
 
     def game_start(self):
         self._starting_time = perf_counter()
@@ -110,6 +116,7 @@ class BrickanoidLogic():
         self._pad = None
         self._level_matrix = LevelMatrix(16, 16)
         self._has_touch_down = False
+        self._starting_new_level = True
 
         #self._check_end_level()
 
@@ -255,6 +262,7 @@ class BrickanoidLogic():
             self._balls = []
             self._level_clear = True
             self._level += 1
+            self._starting_new_level = True
             return True
         return False
 
@@ -267,10 +275,10 @@ class BrickanoidLogic():
             return
         self._game_screen.clear_gfx()
         if self._level == 0 or self._level == 1:
-            brickanoid_levels.create_level_1(self)
+            self._level_loader.load_level(1)
             self._level = 1
         elif self._level == 2:
-            brickanoid_levels.create_level_2(self)
+            self._level_loader.load_level(2)
             self._level = 2
         elif self._level == 3:
             brickanoid_levels.create_level_3(self)
@@ -355,9 +363,24 @@ class BrickanoidLogic():
         self._score_lbl_menu.text = str(self._points)
         self._level_lbl_menu.text = str(self._level)
 
-        if self._check_end_level():
-            self._game_screen.to_menu()
-            self.pause()
+        # if self._game_screen.is_showing_banner():
+        #     return
+
+        if self._level == 0:
+           self._check_end_level()
+
+        if self._starting_new_level:
+            self.continue_level()
+            self._game_screen.show_banner("Level %d" % self._level)
+            self._starting_new_level = False
+            return
+
+        elif self._check_end_level():
+            #self._game_screen.to_menu()
+            self._game_screen.show_banner("Level %d clear" % (self._level-1))
+            #self.pause()
+            self._starting_new_level = True
+            return
 
         if self._pause:
             return

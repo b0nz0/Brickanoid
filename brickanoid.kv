@@ -197,14 +197,16 @@
         TouchArea:
             size_hint_y: 0.08
         
-    # FloatLayout:
-    #     size: root.size
-    #     Label:
-    #         id: count_lbl_act
-    #         text: "0"
-    #         pos_hint: {'center_x': 0.5, 'center_y': 0.5}
-    #         font_size: '30sp'
-    #         halign: "center"
+<NotifyBanner>:
+    pos_hint: {}
+    size_hint_x: 1
+    color: 1, 1, 1
+    text: "Level 100 clear"
+    font_size: '30sp'
+    font_name: 'res/font/RobotoMono-Regular'
+    text_size: self.size
+    valign: "center"
+    halign: "center"
         
 <MenuScreen>:
     score_lbl_menu: score_lbl_menu_act

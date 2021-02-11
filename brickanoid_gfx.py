@@ -6,6 +6,7 @@ from kivy.uix.relativelayout import RelativeLayout
 from kivy.core.image import ImageLoader, Texture
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle, Canvas
+from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.lang.builder import Builder
 from kivy.utils import platform
@@ -212,6 +213,9 @@ class ImgBrickGold_3_0(ImgBrick_3_0):
 class ImgBrickGold_4_0(ImgBrick_4_0):
     texture_obj = get_texture('img_brick_gold_4_0')
 
+class NotifyBanner(Label):
+    pass
+
 class BrickanoidGameScreen(Widget):
 #    count_lbl = ObjectProperty(None)
     score_lbl = ObjectProperty(None)
@@ -228,6 +232,7 @@ class BrickanoidGameScreen(Widget):
     brickanoid_logic = None
     gfx_properties = dict()
     brickanoid_logic = ObjectProperty(None)
+    _banner = None
 
     def start(self):
         global main_game_screen 
@@ -273,6 +278,21 @@ class BrickanoidGameScreen(Widget):
         self.brickanoid_logic.game_start()
         self.brickanoid_logic.continue_level()
 
+    def show_banner(self, text):
+        self._banner = NotifyBanner()
+        self._banner.text = text
+        self._banner.pos = (-self._banner.width * 2, self.gfx_properties['screen_height'] / 4)
+        anim = Animation(x=self.gfx_properties['screen_width'], d=2.)
+        #anim = Animation(pos_hint={'x': 1, 'y': 0.5}, d=1.)
+        anim.start(self._banner)
+        anim.bind(on_complete=self._stop_banner)
+        self.draw_gfx(self._banner)
+
+    def _stop_banner(self, animation, widget):
+        if self._banner:
+            self.remove_gfx(self._banner)
+            self._banner = None
+
     def _keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)
         self._keyboard = None
@@ -295,7 +315,8 @@ class BrickanoidGameScreen(Widget):
         return False
 
     def update(self, dt):
-        self.brickanoid_logic.game_update()
+        if not self._banner:
+            self.brickanoid_logic.game_update()
         for elem in self.game_area.children:
             if isinstance(elem, GfxElement):
                 elem.animate(dt)
