@@ -43,6 +43,7 @@ def load_resources():
     images_textures['img_brick_gold_2_0'] = ImageLoader.load('res/brick_gold_2.png').texture
     images_textures['img_brick_gold_3_0'] = ImageLoader.load('res/brick_gold_3.png').texture
     images_textures['img_brick_gold_4_0'] = ImageLoader.load('res/brick_gold_4.png').texture
+    images_textures['img_brick_concrete_1_0'] = ImageLoader.load('res/brick_concrete_1.png').texture
     images_textures['pad_plain'] = ImageLoader.load('res/pad_plain.png').texture
     images_textures['line_blu'] = ImageLoader.load('res/line_blu.png').texture
     images_textures['touch_area'] = ImageLoader.load('res/bkg_touch.png').texture
@@ -213,6 +214,10 @@ class ImgBrickGold_3_0(ImgBrick_3_0):
 class ImgBrickGold_4_0(ImgBrick_4_0):
     texture_obj = get_texture('img_brick_gold_4_0')
 
+class ImgBrickConcrete_1_0(ImgBrick_1_0):
+    texture_obj = get_texture('img_brick_concrete_1_0')
+
+
 class NotifyBanner(Label):
     pass
 
@@ -326,16 +331,10 @@ class BrickanoidGameScreen(Widget):
         self.game_area.clear_widgets()
 
     def draw_gfx(self, gfx_elem):
-        # with self.canvas:
-        #     Color(1, 0, 0, .5, mode='rgba')
-        #     Rectangle(pos=self.pos, size=self.size)
         if gfx_elem not in self.game_area.children:
             self.game_area.add_widget(gfx_elem)
 
     def remove_gfx(self, gfx_elem):
-        # with self.canvas:
-        #     Color(1, 0, 0, .5, mode='rgba')
-        #     Rectangle(pos=self.pos, size=self.size)
         if gfx_elem in self.game_area.children:
             self.game_area.remove_widget(gfx_elem)
 

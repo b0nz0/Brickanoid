@@ -153,7 +153,7 @@ class BrickanoidLogic():
             if ball.is_idle():
                 rr = randint(-15, +15)
                 ball.velocity = Vector((0, self._unitary_height/4)).rotate(rr)
-                print("vecor: (%d) %s" % (rr, repr(ball.velocity)))
+                print("vector: (%d) %s" % (rr, repr(ball.velocity)))
 
     def _check_collision_balls_bricks(self):
         bricks_to_remove=[]
@@ -208,15 +208,25 @@ class BrickanoidLogic():
 
         for ball in self._balls:
             vx, vy = ball.velocity
-            if (ball.pos[0]) <= self._screen_right or \
-                  (ball.pos[0] + 2 * ball.radius) >= self._screen_width - (2 * self._screen_right):
+            # right border
+            if (ball.pos[0]) <= self._screen_right:
                 vx *= -1
+                ball.pos[0] += 1
                 print("collisione X in %d, %d" % 
                         (ball.pos[0], ball.pos[1]))
+            # right border
+            elif (ball.pos[0] + 2 * ball.radius) >= self._screen_width - (2 * self._screen_right):
+                vx *= -1
+                ball.pos[0] -= 1
+                print("collisione X in %d, %d" % 
+                        (ball.pos[0], ball.pos[1]))            
+            # top bar
             elif ball.widget.collide_widget(self._boundaries_line_top):
                 vy *= -1
+                ball.pos[1] -= 1
                 print("collisione Y in %d, %d" % 
                         (ball.pos[0], ball.pos[1]))
+            # bottom
             elif ball.widget.collide_widget(self._boundaries_line_bottom):
                 print("morte Y in %d, %d" % 
                         (ball.pos[0], ball.pos[1]))
@@ -253,13 +263,17 @@ class BrickanoidLogic():
             return True
     
     def _check_end_level(self):
-        if len(self._bricks) == 0 and not self._pause:
+        # count only non-indestructible bricks
+        actbricks = [brick for brick in self._bricks if brick.strength > 0]
+        if len(actbricks) == 0 and not self._pause:
             # no more bricks
             print("VITTORIA!")
 
             self._level_matrix = LevelMatrix(16, 16)
             self._game_screen.clear_gfx()
             self._balls = []
+            self._bricks = []
+            self._pad = None
             self._level_clear = True
             self._level += 1
             self._starting_new_level = True
@@ -274,18 +288,9 @@ class BrickanoidLogic():
         if not self._level_clear:
             return
         self._game_screen.clear_gfx()
-        if self._level == 0 or self._level == 1:
-            self._level_loader.load_level(1)
-            self._level = 1
-        elif self._level == 2:
-            self._level_loader.load_level(2)
-            self._level = 2
-        elif self._level == 3:
-            brickanoid_levels.create_level_3(self)
-            self._level = 3
-        elif self._level == 4:
-            brickanoid_levels.create_level_4(self)
-            self._level = 4
+        if self._level == 0:
+            self._level = 1 
+        self._level_loader.load_level(self._level)
 
         self._pad = brickanoid_elements.PadYellow_2()
         self._pad.pos = (self._screen_width // 2 - self._pad._widget.width // 2, 
@@ -300,6 +305,8 @@ class BrickanoidLogic():
             self._process_fire = False
 
     def touch_move(self, x, y):
+        if not self._pad:
+            return
         newx, newy = self._pad.pos
         newx = x - self._pad.widget.width / 2
         if newx < 0:
@@ -358,6 +365,7 @@ class BrickanoidLogic():
 
         # game_screen.clear_gfx()
         if self._game_over:
+            self._game_screen.to_menu()
             return
 
         self._score_lbl_menu.text = str(self._points)
@@ -378,6 +386,7 @@ class BrickanoidLogic():
         elif self._check_end_level():
             #self._game_screen.to_menu()
             self._game_screen.show_banner("Level %d clear" % (self._level-1))
+            self._points += self._level * 100
             #self.pause()
             self._starting_new_level = True
             return
@@ -409,7 +418,7 @@ class BrickanoidLogic():
                 self._balls.remove(ball)
         if self._check_end_life():
             if self._lives == 0:
-                print ("Game Over!")
+                self._game_screen.show_banner("Game Over")
                 self._game_over = True
         
         self._check_collision_balls_pad()
@@ -425,6 +434,7 @@ class BrickanoidLogic():
         for elem in self._balls:
             self._game_screen.draw_gfx(elem.widget)
 
-        self._game_screen.draw_gfx(self._pad.widget)
+        if self._pad:
+            self._game_screen.draw_gfx(self._pad.widget)
         #print("aggiornato pad: %f" % perf_counter())
 

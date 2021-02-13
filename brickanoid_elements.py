@@ -92,6 +92,10 @@ class BaseBrick(BaseElem):
     def bwidth(self):
         return self._bwidth
 
+    @property
+    def strength(self):
+        return self._strength
+
     # returns true if brick has to be removed and points assigned
     def collided(self):
         if self._strength == 0:
@@ -274,3 +278,11 @@ class BrickGold_4_0(BaseBrick):
         self._bheight = 1
         self._bwidth = 4
         self._strength = 2
+
+class BrickConcrete_1_0(BaseBrick):
+    def __init__(self):
+        self._widget = brickanoid_gfx.ImgBrickConcrete_1_0()
+        self._points = 0
+        self._bheight = 1
+        self._bwidth = 1
+        self._strength = 0 #indestructible
