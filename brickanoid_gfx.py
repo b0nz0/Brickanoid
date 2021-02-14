@@ -269,6 +269,8 @@ class BrickanoidGameScreen(Widget):
 
         self.brickanoid_logic = brickanoid_logic.BrickanoidLogic(self)
         self.brickanoid_logic.game_start()
+        self.brickanoid_logic.pause()
+        self.to_menu()
 
     def to_menu(self):
         self.screen_manager.current = 'menu'
