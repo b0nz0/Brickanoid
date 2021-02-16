@@ -228,7 +228,8 @@ class BrickanoidGameScreen(Widget):
     level_lbl = ObjectProperty(None)    
     score_lbl_menu = ObjectProperty(None)
     hiscore_lbl_menu = ObjectProperty(None)    
-    level_lbl_menu = ObjectProperty(None)    
+    level_lbl_menu = ObjectProperty(None)  
+    level_spinner_menu = ObjectProperty(None)  
     game_area = ObjectProperty(None)
     menu_screen = ObjectProperty(None)
     screen_manager = ObjectProperty(None)
@@ -250,6 +251,7 @@ class BrickanoidGameScreen(Widget):
         self.gfx_properties['score_lbl_menu'] = self.menu_screen.score_lbl_menu
         self.gfx_properties['hiscore_lbl_menu'] = self.menu_screen.hiscore_lbl_menu
         self.gfx_properties['level_lbl_menu'] = self.menu_screen.level_lbl_menu
+        self.gfx_properties['level_spinner_menu'] = self.menu_screen.level_spinner_menu
         self.gfx_properties['boundaries_line_bottom'] = self.boundaries_line_bottom
         self.gfx_properties['boundaries_line_top'] = self.boundaries_line_top
         self.gfx_properties['screen_width'] = Window.width

@@ -60,6 +60,8 @@ class BrickanoidLogic():
     _hiscore = 0
     #current level
     _level = 0
+    # max level reached
+    _hilevel = 1
     # process a fire event
     _process_fire = False
     # waiting for next level
@@ -104,13 +106,14 @@ class BrickanoidLogic():
         self._score_lbl_menu = self._game_screen.gfx_properties['score_lbl_menu']
         self._hiscore_lbl_menu = self._game_screen.gfx_properties['hiscore_lbl_menu'] 
         self._level_lbl_menu = self._game_screen.gfx_properties['level_lbl_menu']
+        self._level_spinner_menu = self._game_screen.gfx_properties['level_spinner_menu']
         self._game_screen = self._game_screen.gfx_properties['game_screen']
         self._menu_screen = self._game_screen.menu_screen
 
         self._lives = 3
         self._game_over = False
         self._score = 0
-        self._level = 0       
+        self._level = int(self._level_spinner_menu.text)       
         self._process_fire = False
         self._level_clear = True
         self._pause = False
@@ -120,12 +123,30 @@ class BrickanoidLogic():
         self._level_matrix = LevelMatrix(16, 16)
         self._has_touch_down = False
         self._starting_new_level = True
-
+        
         self._store = JsonStore('brickanoid.json')
-        his = list(self._store.find(name='hiscore'))
-        if len(his) > 0:
-            self._hiscore = his[0][1]['value']
+        try:
+            store = self._store.get('hiscore')
+            self._hiscore = int(store['value'])
+            store = self._store.get('hilevel')
+            self._hilevel = int(store['value'])
+        except KeyError:
+            self._store.put('hiscore', value=0)
+            self._store.put('hilevel', value=1)
+            #self._store.put('hilevel', 1)
+            self._hiscore = 0
+            self._hilevel = 1
+        # his = list(self._store.find(name='hiscore'))
+        # if len(his) > 0:
+        #     self._hiscore = his[0][1]['value']
         self._hiscore_lbl_menu.text = str(self._hiscore)
+        self._update_level_spinner()
+
+    def _update_level_spinner(self):        
+        level_values = []
+        for i in range(1, self._hilevel + 1):
+            level_values.append(str(i))
+        self._level_spinner_menu.values = level_values
 
         #self._check_end_level()
 
@@ -176,15 +197,18 @@ class BrickanoidLogic():
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = vx, - vy
+                    ball.pos[1] -= 1
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
                     break
+                #vertical collision from top
                 elif brick.widget.collide_point((ball.pos[0] + ball.radius), (ball.pos[1])):
                     print("collisione TOP in %d, %d - %d, %d" % 
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = vx, - vy
+                    ball.pos[1] += 1
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -195,6 +219,7 @@ class BrickanoidLogic():
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
+                    ball.pos[0] -= 1
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -206,6 +231,7 @@ class BrickanoidLogic():
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
+                    ball.pos[0] += 1
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -396,10 +422,14 @@ class BrickanoidLogic():
 
         elif self._check_end_level():
             #self._game_screen.to_menu()
-            self._game_screen.show_banner("Level %d clear" % (self._level-1))
             self._score += (self._level - 1) * 100
             #self.pause()
             self._starting_new_level = True
+            if self._level > self._hilevel:
+                self._hilevel = self._level
+                self._store.put('hilevel', value=self._hilevel)
+                self._update_level_spinner()
+            self._game_screen.show_banner("Level %d clear" % (self._level-1))
             return
 
         if self._pause:
@@ -442,7 +472,7 @@ class BrickanoidLogic():
         if self._score > self._hiscore:
             self._hiscore = self._score 
             self._hiscore_lbl_menu.text = str(self._hiscore)
-            self._store.put('game', name='hiscore', value=self._hiscore)
+            self._store.put('hiscore', value=self._hiscore)
 
         # draw bricks, balls and the pad
         for elem in self._bricks:

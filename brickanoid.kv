@@ -212,6 +212,7 @@
     score_lbl_menu: score_lbl_menu_act
     hiscore_lbl_menu: hiscore_lbl_menu_act
     level_lbl_menu: level_lbl_menu_act
+    level_spinner_menu: level_spinner_menu_act
     BoxLayout:
         canvas.before:
             Color:
@@ -316,10 +317,18 @@
         Button:
             text: 'Continue'
             on_press: root.manager.get_screen('game').ids['brickanoid_game'].to_continue()
-        Button:
+        BoxLayout:
+            orientation: 'horizontal'
             size_hint_y: 1/6
-            text: 'Restart'
-            on_press: root.manager.get_screen('game').ids['brickanoid_game'].to_restart()
+            Button:
+                size_hint_x: 0.7
+                text: 'Restart from level:'
+                on_press: root.manager.get_screen('game').ids['brickanoid_game'].to_restart()
+            Spinner:
+                size_hint_x: 0.3
+                id: level_spinner_menu_act
+                text: '1'
+                values: '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17'
 
 <SettingsScreen>:
     BoxLayout:
