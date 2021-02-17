@@ -268,6 +268,7 @@ class BrickanoidGameScreen(Widget):
             # linux/win/macos specific stuff. Keyboard binds for example
             self._keyboard = Window.request_keyboard(self._keyboard_closed, self)
             self._keyboard.bind(on_key_down=self._on_keyboard_down)
+            self._keyboard.bind(on_key_up=self._on_keyboard_up)
 
         self.brickanoid_logic = brickanoid_logic.BrickanoidLogic(self)
         self.brickanoid_logic.game_start()
@@ -323,8 +324,21 @@ class BrickanoidGameScreen(Widget):
 
         return False
 
+    def _on_keyboard_up(self, keyboard, keycode):
+        print("rilasciato %s" % keycode[1])
+
+        if keycode[1] == 'left':
+            self.brickanoid_logic.stop_left()
+            return True
+
+        elif keycode[1] == 'right':
+            self.brickanoid_logic.stop_right()
+            return True
+
+        return False
+
     def update(self, dt):
-        if not self._banner:
+        if not self._banner and self.screen_manager.current == 'game':
             self.brickanoid_logic.game_update()
         for elem in self.game_area.children:
             if isinstance(elem, GfxElement):

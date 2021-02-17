@@ -123,6 +123,9 @@ class BrickanoidLogic():
         self._level_matrix = LevelMatrix(16, 16)
         self._has_touch_down = False
         self._starting_new_level = True
+        self._moving_left = False
+        self._moving_right = False
+
         
         self._store = JsonStore('brickanoid.json')
         try:
@@ -191,39 +194,17 @@ class BrickanoidLogic():
             if ball.is_idle():
                 continue
             for brick in self._bricks:
-                # vertical collision from bottom
-                if brick.widget.collide_point((ball.pos[0] + ball.radius), (ball.pos[1] + 2 * ball.radius)):
-                    print("collisione BOTTOM in %d, %d - %d, %d" % 
-                        (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
-                    vx, vy = ball.velocity
-                    ball.velocity = vx, - vy
-                    ball.pos[1] -= 1
-                    if brick.collided():
-                        bricks_to_remove.append(brick)
-                        self._score += brick.points
-                    break
-                #vertical collision from top
-                elif brick.widget.collide_point((ball.pos[0] + ball.radius), (ball.pos[1])):
-                    print("collisione TOP in %d, %d - %d, %d" % 
-                        (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
-                    vx, vy = ball.velocity
-                    ball.velocity = vx, - vy
-                    ball.pos[1] += 1
-                    if brick.collided():
-                        bricks_to_remove.append(brick)
-                        self._score += brick.points
-                    break
                 # horizontal collision from left
-                elif brick.widget.collide_point((ball.pos[0] + 2 * ball.radius), (ball.pos[1] + ball.radius)):
+                if brick.widget.collide_point((ball.pos[0] + 2 * ball.radius), (ball.pos[1] + ball.radius)):
                     print("collisione LEFT in %d, %d - %d, %d" % 
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
-                    ball.pos[0] -= 1
+                    ball.pos[0] -= 2
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
-                    break
+                    
                 # horizontal collision from right
                 elif brick.widget.collide_point((ball.pos[0]), (ball.pos[1] + ball.radius)):
                 #if ball.widget.collide_widget(brick.widget):
@@ -231,11 +212,33 @@ class BrickanoidLogic():
                         (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
-                    ball.pos[0] += 1
+                    ball.pos[0] += 2
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
-                    break
+                    
+                # vertical collision from bottom
+                elif brick.widget.collide_point((ball.pos[0] + ball.radius), (ball.pos[1] + 2 * ball.radius)):
+                    print("collisione BOTTOM in %d, %d - %d, %d" % 
+                        (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
+                    vx, vy = ball.velocity
+                    ball.velocity = vx, - vy
+                    ball.pos[1] -= 2
+                    if brick.collided():
+                        bricks_to_remove.append(brick)
+                        self._score += brick.points
+                    
+                #vertical collision from top
+                elif brick.widget.collide_point((ball.pos[0] + ball.radius), (ball.pos[1])):
+                    print("collisione TOP in %d, %d - %d, %d" % 
+                        (ball.pos[0], ball.pos[1], brick.pos[0], brick.pos[1]))
+                    vx, vy = ball.velocity
+                    ball.velocity = vx, - vy
+                    ball.pos[1] += 2
+                    if brick.collided():
+                        bricks_to_remove.append(brick)
+                        self._score += brick.points
+                    
         return bricks_to_remove
                 
     def _check_collision_balls_border(self):
@@ -367,12 +370,18 @@ class BrickanoidLogic():
             self.fire()
 
     def move_left(self):
-        if self._pad:
-            self.touch_move(self._pad.pos[0]-5 + self._pad.widget.width / 2, self._pad.pos[1])
+        self._moving_left = True
+        self._moving_right = False
 
     def move_right(self):
-        if self._pad:
-            self.touch_move(self._pad.pos[0]+5 + self._pad.widget.width / 2, self._pad.pos[1])
+        self._moving_left = False
+        self._moving_right = True
+
+    def stop_left(self):
+        self._moving_left = False
+
+    def stop_right(self):
+        self._moving_right = False
 
     def fire(self):
         self._process_fire = True
@@ -442,7 +451,12 @@ class BrickanoidLogic():
             elem.move()
 
         # move te pad accoringly to its speed        
-        self._pad.move()
+        if self._pad:
+            self._pad.move()
+            if self._moving_left:
+                self.touch_move(self._pad.pos[0]-5 + self._pad.widget.width / 2, self._pad.pos[1])
+            elif self._moving_right:
+                self.touch_move(self._pad.pos[0]+5 + self._pad.widget.width / 2, self._pad.pos[1])
 
         # check collision with bricks. Check if some brick has to be removed
         deadbricks = self._check_collision_balls_bricks()
