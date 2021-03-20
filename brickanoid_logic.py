@@ -201,6 +201,7 @@ class BrickanoidLogic():
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
                     ball.pos[0] -= 2
+                    self._game_screen.play_sound('brick_hit')
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -213,6 +214,7 @@ class BrickanoidLogic():
                     vx, vy = ball.velocity
                     ball.velocity = - vx, vy
                     ball.pos[0] += 2
+                    self._game_screen.play_sound('brick_hit')
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -224,6 +226,7 @@ class BrickanoidLogic():
                     vx, vy = ball.velocity
                     ball.velocity = vx, - vy
                     ball.pos[1] -= 2
+                    self._game_screen.play_sound('brick_hit')
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -235,6 +238,7 @@ class BrickanoidLogic():
                     vx, vy = ball.velocity
                     ball.velocity = vx, - vy
                     ball.pos[1] += 2
+                    self._game_screen.play_sound('brick_hit')
                     if brick.collided():
                         bricks_to_remove.append(brick)
                         self._score += brick.points
@@ -291,10 +295,12 @@ class BrickanoidLogic():
                 vy *= -1
                 offset = self._pad.pos[0] + (self._pad.widget.width / 2) - (ball.pos[0] + ball.radius)
                 ball.velocity = vx - offset / 4, vy       
+                self._game_screen.play_sound('pad_hit')
 
     def _check_end_life(self):
         if len(self._balls) == 0:
             print("MORTO!")
+            self._game_screen.play_sound('game_over')
             if self._lives > 0:
                 self._create_random_ball()
                 self._lives -= 1
@@ -323,7 +329,9 @@ class BrickanoidLogic():
 
     def continue_level(self):
         self._pause = False
-        if not self._level_clear:
+        if self._game_over:
+            self.game_start()
+        elif not self._level_clear:
             return
         self._game_screen.clear_gfx()
         if self._level == 0:
@@ -426,6 +434,7 @@ class BrickanoidLogic():
         if self._starting_new_level:
             self.continue_level()
             self._game_screen.show_banner("Level %d" % self._level)
+            self._game_screen.play_sound('game_start')
             self._starting_new_level = False
             return
 

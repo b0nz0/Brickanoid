@@ -10,15 +10,17 @@ from kivy.animation import Animation
 from kivy.clock import Clock
 from kivy.lang.builder import Builder
 from kivy.utils import platform
+from kivy.core.audio import SoundLoader
 from time import perf_counter
 
 import brickanoid_logic 
 
 images_textures = dict()
+sound_fx = dict()
 main_game_screen = None
 
 def load_resources():
-    global images_textures
+    global images_textures, sound_fx
     images_textures['img_brick_red_1_0'] = ImageLoader.load('res/brick_red_1.png').texture
     images_textures['img_brick_red_2_0'] = ImageLoader.load('res/brick_red_2.png').texture
     images_textures['img_brick_red_3_0'] = ImageLoader.load('res/brick_red_3.png').texture
@@ -50,6 +52,10 @@ def load_resources():
     images_textures['ball_plain'] = ImageLoader.load('res/ball_200x200.png').texture
     images_textures['pad_yellow_2_0'] = ImageLoader.load('res/pad_yel_2_0.png').texture
     images_textures['pad_yellow_2_1'] = ImageLoader.load('res/pad_yel_2_1.png').texture
+    sound_fx['game_over'] = SoundLoader.load('res/audio/gameover.ogg')
+    sound_fx['game_start'] = SoundLoader.load('res/audio/gamestart.ogg')
+    sound_fx['brick_hit'] = SoundLoader.load('res/audio/brickhit.ogg')
+    sound_fx['pad_hit'] = SoundLoader.load('res/audio/padhit.ogg')
     
 
 def get_texture(texture_name):
@@ -57,6 +63,12 @@ def get_texture(texture_name):
     if texture_name not in images_textures:
         load_resources()
     return images_textures[texture_name]
+    
+def get_sound(sound_name):
+    global sound_fx
+    if sound_name not in sound_fx:
+        load_resources()
+    return sound_fx[sound_name]
     
 class GfxElement(Widget):
     texture_obj = ObjectProperty(None)
@@ -302,6 +314,11 @@ class BrickanoidGameScreen(Widget):
         if self._banner:
             self.remove_gfx(self._banner)
             self._banner = None
+
+    def play_sound(self, sound_name):
+        fx = get_sound(sound_name)
+        fx.seek(0.0)
+        fx.play()
 
     def _keyboard_closed(self):
         self._keyboard.unbind(on_key_down=self._on_keyboard_down)

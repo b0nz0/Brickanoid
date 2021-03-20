@@ -53,11 +53,36 @@ LVL5 = '''
 -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
 '''
 
+LVL6 = '''
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+------------------------1bn---------------------
+---------------------1bn1dn1bn------------------
+------------------1bn3dndddddd1bn---------------
+------------1bn3dndddddd1dn3dndddddd1bn---------
+---------------1bn2dnddd1dn2dnddd1bn------------
+------------------1bn3dndddddd1bn---------------
+---------------1bn2dnddd1bn2dnddd1bn------------
+---------------1bn1dn1bn---1bn1dn1bn------------
+------------------1bn---------1bn---------------
+-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+'''
+
 LVLEND = '''
 ------------------4rnrrrrrrrrr------------------
 1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn1cn
 ------------------------------------------------
 '''
+
+def load_levels(logic):
+    level_loader = LevelLoader(logic)
+    level_loader.define_level(1, LVL1)
+    level_loader.define_level(2, LVL2)
+    level_loader.define_level(3, LVL3)
+    level_loader.define_level(4, LVL4)
+    level_loader.define_level(5, LVL5)
+    level_loader.define_level(6, LVL6)
+    level_loader.define_level(7, LVLEND)
+    return level_loader
 
 class LevelLoader():
     _logic = None
@@ -137,13 +162,4 @@ class LevelLoader():
                 # newline if CR/LF found or end of string
 
 
-def load_levels(logic):
-    level_loader = LevelLoader(logic)
-    level_loader.define_level(1, LVL1)
-    level_loader.define_level(2, LVL2)
-    level_loader.define_level(3, LVL3)
-    level_loader.define_level(4, LVL4)
-    level_loader.define_level(5, LVL5)
-    level_loader.define_level(6, LVLEND)
-    return level_loader
 
